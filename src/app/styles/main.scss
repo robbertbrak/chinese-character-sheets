@@ -1,0 +1,59 @@
+html {
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: white;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+body {
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.character-grid {
+  margin: auto;
+  background-color: white;
+  color: black;
+  font-family: UKaiCN, Georgia, serif;
+
+  table {
+    border-collapse: collapse;
+    margin: auto;
+    position: relative;
+
+    td {
+      border: 1px solid black;
+      position: relative;
+
+      &:before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 0;
+        height: inherit;
+        border-left: 1px dotted rgba(0, 0, 0, 0.25);
+      }
+
+      &:after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: inherit;
+        border-bottom: 1px dotted rgba(0, 0, 0, 0.25);
+      }
+    }
+  }
+}
