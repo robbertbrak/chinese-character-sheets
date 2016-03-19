@@ -66,8 +66,8 @@ class Main extends React.Component {
         () => {
           grid.style.display = 'block';
           pdf.setFontSize(12);
-          pdf.text(400, 40, '(c) Robbert Brak, robbertbrak.com');
-          pdf.addHTML(grid, 0, 60, () => {
+          pdf.text(400, 830, '(c) Robbert Brak, robbertbrak.com');
+          pdf.addHTML(grid, 0, 40, () => {
             if (pages.length > 1) {
               pdf.addPage();
               this.generatePage(pdf, pages.slice(1))
