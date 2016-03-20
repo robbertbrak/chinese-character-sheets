@@ -80,7 +80,7 @@ class Main extends React.Component {
 
     for (let p = 0; p < pages.length; p++) {
       if (p > 0) doc.addPage();
-      doc.font('Times-Roman').fontSize(8).text('(c) Robbert Brak, robbertbrak.com', 440, 760);
+      doc.font('Helvetica').fontSize(8).text('(c) Robbert Brak, robbertbrak.com', 440, 760);
       doc.font('UKaiCN').fontSize(size - Math.round(size / 8));
       for (let i = 0; i < this.state.squaresPerLine; i++) {
         for (let j = 0; j < pages[p].length; j++) {
@@ -103,7 +103,7 @@ class Main extends React.Component {
     let stream = doc.pipe(BlobStream());
     doc.end();
     stream.on('finish', () => {
-      let url = stream.toBlobURL('application/pdf')
+      let url = stream.toBlobURL('application/pdf');
       document.getElementById("pdf-preview").src = url;
     });
   }

@@ -5,46 +5,30 @@ var nodeModulesPath = path.resolve(__dirname, 'node_modules');
 var TransferWebpackPlugin = require('transfer-webpack-plugin');
 
 var config = {
-  //Entry points to the project
-  entry: [
-    'webpack/hot/dev-server',
-    'webpack/hot/only-dev-server',
-    path.join(__dirname, '/src/app/app.jsx')
-  ],
-  //Config options on how to interpret requires imports
-  resolve: {
-    extensions: ["", ".js", ".jsx"]
-    //node_modules: ["web_modules", "node_modules"]  (Default Settings)
+  entry: {
+    app: ['webpack/hot/dev-server', 'webpack/hot/only-dev-server', path.join(__dirname, '/src/app/app.jsx')],
+    vendor: ['react', 'material-ui', 'fzcs-pdfkit-fontkit']
   },
-  //Server Configuration options
+  resolve: { extensions: ['', '.js', '.jsx']},
   devServer:{
-    contentBase: 'src/www',  //Relative directory for base of server
+    contentBase: 'src/www',
     devtool: 'eval',
-    hot: true,        //Live-reload
+    hot: true,
     inline: true,
-    port: 3000,        //Port Number
-    host: 'localhost'  //Change to '0.0.0.0' for external facing server
+    port: 3000,
+    host: 'localhost'
   },
   devtool: 'eval',
-  output: {
-    path: buildPath,    //Path of output file
-    filename: 'app.js'
-  },
+  output: { path: buildPath, filename: 'app.js'},
   plugins: [
-    //Enables Hot Modules Replacement
     new webpack.HotModuleReplacementPlugin(),
-    //Allows error warnings but does not stop compiling. Will remove when eslint is added
     new webpack.NoErrorsPlugin(),
-    //Moves files
-    new TransferWebpackPlugin([
-      {from: 'www'}
-    ], path.resolve(__dirname, "src"))
+    new TransferWebpackPlugin([{from: 'www'}], path.resolve(__dirname, 'src')),
+    new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.js')
   ],
   module: {
-    //Loaders to interpret non-vanilla javascript code as well as most other extensions including images and text.
     preLoaders: [
       {
-        //Eslint loader
         test: /\.(jsx)$/,
         loader: 'eslint-loader',
         include: [path.resolve(__dirname, "src/app")],
@@ -53,13 +37,12 @@ var config = {
     ],
     loaders: [
       { test: /\.(jsx)$/, loaders: ['react-hot', 'babel'], exclude: [nodeModulesPath]},
-      { test: /\.scss$/, loaders: ["style", "css?sourceMap", "sass?sourceMap"]},
-      { test: /\.json$/, loaders: ["json"]},
-      { test: /fzcs-pdfkit-fontkit|pdfkit|fontkit|unicode-trie|unicode-properties|png-js/, loader: "transform?brfs" },
+      { test: /\.scss$/, loaders: ['style', 'css?sourceMap', 'sass?sourceMap']},
+      { test: /\.json$/, loaders: ['json']},
+      { test: /fzcs-pdfkit-fontkit|pdfkit|fontkit|unicode-trie|unicode-properties|png-js/, loader: 'transform?brfs' },
       { test: /\.(png|woff|woff2|eot|ttf|svg)$/, loader: 'url-loader?limit=100000' }
     ]
   },
-  //eslint config options. Part of the eslint-loader package
   eslint: {
     configFile: '.eslintrc'
   },
