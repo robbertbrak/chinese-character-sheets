@@ -45,23 +45,18 @@ var config = {
     preLoaders: [
       {
         //Eslint loader
-        test: /\.(js|jsx)$/,
+        test: /\.(jsx)$/,
         loader: 'eslint-loader',
         include: [path.resolve(__dirname, "src/app")],
         exclude: [nodeModulesPath]
       },
     ],
     loaders: [
-      {
-        //React-hot loader and
-        test: /\.(js|jsx)$/,  //All .js and .jsx files
-        loaders: ['react-hot', 'babel'], //react-hot is like browser sync and babel loads jsx and es6-7
-        exclude: [nodeModulesPath]
-      },
-      {
-        test: /\.scss$/,
-        loaders: ["style", "css?sourceMap", "sass?sourceMap"]
-      }
+      { test: /\.(jsx)$/, loaders: ['react-hot', 'babel'], exclude: [nodeModulesPath]},
+      { test: /\.scss$/, loaders: ["style", "css?sourceMap", "sass?sourceMap"]},
+      { test: /\.json$/, loaders: ["json"]},
+      { test: /fzcs-pdfkit-fontkit|pdfkit|fontkit|unicode-trie|unicode-properties|png-js/, loader: "transform?brfs" },
+      { test: /\.(png|woff|woff2|eot|ttf|svg)$/, loader: 'url-loader?limit=100000' }
     ]
   },
   //eslint config options. Part of the eslint-loader package

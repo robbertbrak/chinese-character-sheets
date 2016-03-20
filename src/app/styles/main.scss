@@ -22,6 +22,17 @@ body {
   line-height: 20px;
 }
 
+.container {
+  text-align: center;
+  //padding-top: 100px;
+}
+
+.left, .right {
+  padding: 50px;
+  float: left;
+  min-width: 400px;
+}
+
 .character-grid {
   margin: auto;
   background-color: white;
