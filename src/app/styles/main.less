@@ -2,6 +2,7 @@
 @secondary-color: #ffa726;
 @secondary-color-dark: #f57c00;
 @disabled-color: #ccc;
+@disabled-color-dark: #aaa;
 
 @import "~bootstrap/less/bootstrap";
 @import "slider.less";
@@ -21,7 +22,7 @@
   }
 }
 
-.btn-primary {
+.btn-primary, .btn-primary[disabled] {
   background-color: @secondary-color;
   border-color: @secondary-color;
   color: white;
@@ -32,73 +33,6 @@
   }
 }
 
-/*
-input[type=range] {
-  -webkit-appearance: none;
-  margin: 10px 0;
-  width: 100%;
-}
-
-input[type=range]:focus {
-  outline: none;
-}
-
-input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 10px;
-  cursor: pointer;
-  animate: 0.2s;
-  box-shadow: 0 0 0 #000000, 0 0 0 #0d0d0d;
-  background: #ccc;
-  border-radius: 25px;
-  border: 0 solid #000101;
-}
-
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  // box-shadow: 0 0 0 #000000, 0 0 0 #0d0d0d;
-  border: 0 solid #000000;
-  height: 20px;
-  width: 20px;
-  border-radius: 20px;
-  background: @primary-color;
-  cursor: pointer;
-  margin-top: -5px;
-}
-*/
-
-.character-grid {
-  margin: auto;
-  background-color: white;
-  color: black;
-  font-family: UKaiCN, Georgia, serif;
-
-  table {
-    border-collapse: collapse;
-    margin: auto;
-    position: relative;
-
-    td {
-      border: 1px solid black;
-      position: relative;
-
-      &:before {
-        content: '';
-        position: absolute;
-        left: 50%;
-        top: 0;
-        height: inherit;
-        border-left: 1px dotted rgba(0, 0, 0, 0.25);
-      }
-
-      &:after {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 50%;
-        width: inherit;
-        border-bottom: 1px dotted rgba(0, 0, 0, 0.25);
-      }
-    }
-  }
+.row.higher {
+  margin-bottom: 15px;
 }

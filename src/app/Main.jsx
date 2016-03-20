@@ -18,14 +18,22 @@ class Main extends React.Component {
       charactersOnCurrentPage: '',
       squaresPerLine: 9,
       numGray: 3,
-      loading: true
+      loading: false,
+      percentComplete: 0
     }
   }
 
   componentDidMount() {
+    this.setState({loading: true});
     let request = new XMLHttpRequest();
     request.open("GET", "fonts/UKaiCN.ttf", true);
     request.responseType = "arraybuffer";
+    request.addEventListener("progress", (evt) => {
+      if (evt.lengthComputable) {
+        let percentComplete = Math.round(100 * evt.loaded / evt.total);
+        this.setState({percentComplete: percentComplete});
+      }
+    }, false);
     request.send(null);
     request.onload = () => {
       this.setState({fontBuffer: request.response, loading: false});
@@ -128,7 +136,7 @@ class Main extends React.Component {
             </nav>
             <div className="container-fluid">
               <div className="row">
-                <div className="col-xs-4">
+                <div className="col-sm-4">
                   <form>
                     <div className="form-group">
                       <label htmlFor="input-characters">Type characters here</label>
@@ -147,15 +155,22 @@ class Main extends React.Component {
                              value={this.state.numGray} onChange={this.setNumGray}>
                       </input>
                     </div>
-                    <div className="form-group">
-                      {this.state.loading ? <div>Please wait while loading font...</div> : false}
-                      <button className="btn btn-primary btn-lg" disabled={this.state.loading} onClick={this.generatePdf}>
+                  </form>
+                  <div className="row higher">
+                    <div className="col-md-12">
+                      <button className="btn btn-primary btn-lg pull-right"
+                              disabled={this.state.loading} onClick={this.generatePdf}>
                         Generate PDF
                       </button>
+                      {this.state.loading ?
+                          (<div className="col-md-12">
+                            <span className="pull-right">
+                            {'Please wait while font is loading... ' + this.state.percentComplete + '%'}</span>
+                          </div>) : false}
                     </div>
-                  </form>
+                  </div>
                 </div>
-                <div className="col-xs-8">
+                <div className="col-sm-8">
                   <iframe id="pdf-preview" width="595" height="800" src=""></iframe>
                 </div>
               </div>
