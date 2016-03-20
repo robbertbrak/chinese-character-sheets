@@ -1,28 +1,13 @@
-import React from 'react';
-import getMuiTheme from 'material-ui/lib/styles/getMuiTheme';
-import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider';
-import TextField from 'material-ui/lib/text-field';
-import AppBar from 'material-ui/lib/app-bar';
-import RaisedButton from 'material-ui/lib/raised-button';
-import Slider from 'material-ui/lib/slider';
-import MyTheme from './theme/theme';
-import CharacterGrid from './CharacterGrid';
+import React, { Component } from 'react';
+import TextArea from 'react-textarea-autosize';
 
 let PDFDocument = require('fzcs-pdfkit-fontkit');
 let BlobStream = require('blob-stream');
 
-const styles = {
-  button: {
-    margin: 12,
-  }
-};
-
-const muiTheme = getMuiTheme(MyTheme);
-
 class Main extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.updateGrid = this.updateGrid.bind(this);
+    this.setCharacters = this.setCharacters.bind(this);
     this.setSquaresPerLine = this.setSquaresPerLine.bind(this);
     this.setNumGray = this.setNumGray.bind(this);
     this.generatePdf = this.generatePdf.bind(this);
@@ -47,22 +32,25 @@ class Main extends React.Component {
     }
   }
 
-  updateGrid(e) {
+  setCharacters(e) {
     this.setState({characters: e.target.value});
   }
 
-  setSquaresPerLine(_, value) {
+  setSquaresPerLine(e) {
     this.setState({
-      squaresPerLine: value,
-      numGray: Math.min(this.state.numGray, value)
+      squaresPerLine: e.target.value,
+      numGray: Math.min(this.state.numGray, e.target.value - 1)
     })
   }
 
-  setNumGray(_, value) {
-    this.setState({numGray: value})
+  setNumGray(e) {
+    this.setState({
+      numGray: e.target.value
+    })
   }
 
-  generatePdf() {
+  generatePdf(e) {
+    e.preventDefault();
     let size = Math.round(500 / this.state.squaresPerLine);
     if (size % 2 === 1) size += 1;
     let h = size / 2;
@@ -130,41 +118,49 @@ class Main extends React.Component {
 
   render() {
     return (
-        <MuiThemeProvider muiTheme={muiTheme}>
           <div>
-            <AppBar title="Chinese Character Practice Sheets"
-                    iconClassNameRight="muidocs-icon-navigation-expand-more"
-                    iconClassNameLeft="none"
-            />
-            <div className="container">
-              <span className="left">
-                <TextField floatingLabelText="Type characters here"
-                           fullWidth={true}
-                           value={this.state.characters}
-                           onChange={this.updateGrid}/>
-                <br/>
-                <div style={{paddingTop: 20 }}>
-                  <Slider description={"Number of squares per line: " + this.state.squaresPerLine}
-                          step={1} min={4} max={10} value={this.state.squaresPerLine}
-                          required={false}
-                          onChange={this.setSquaresPerLine} />
-                  <Slider description={"Number of gray characters: " + this.state.numGray}
-                          step={1} min={0} max={this.state.squaresPerLine - 1} value={this.state.numGray}
-                          required={false}
-                          onChange={this.setNumGray} />
-
+            <nav className="navbar navbar-default">
+              <div className="container">
+                <div className="navbar-header">
+                  <div className="navbar-brand">Chinese Character Practice Sheets</div>
                 </div>
-                {this.state.loading ? <div>Please wait while loading font...</div> : false}
-                <RaisedButton label="Generate PDF" primary={true} style={styles.button} disabled={this.state.loading}
-                onClick={this.generatePdf} />
-                <br/>
-              </span>
-              <span className="right">
-                <iframe id="pdf-preview" width="595" height="800" src=""></iframe>
-              </span>
+              </div>
+            </nav>
+            <div className="container-fluid">
+              <div className="row">
+                <div className="col-xs-4">
+                  <form>
+                    <div className="form-group">
+                      <label htmlFor="input-characters">Type characters here</label>
+                      <TextArea className="form-control" id="input-characters" type="text" minRows={2}
+                             value={this.state.characters} onChange={this.setCharacters} />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="input-squaresperline">{'Number of squares per line: ' + this.state.squaresPerLine}</label>
+                      <input type="range" min={4} max={10} step={1}
+                             value={this.state.squaresPerLine} onChange={this.setSquaresPerLine}>
+                      </input>
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="input-numgray">{'Number of gray characters: ' + this.state.numGray}</label>
+                      <input type="range" min={0} max={this.state.squaresPerLine - 1} step={1}
+                             value={this.state.numGray} onChange={this.setNumGray}>
+                      </input>
+                    </div>
+                    <div className="form-group">
+                      {this.state.loading ? <div>Please wait while loading font...</div> : false}
+                      <button className="btn btn-primary btn-lg" disabled={this.state.loading} onClick={this.generatePdf}>
+                        Generate PDF
+                      </button>
+                    </div>
+                  </form>
+                </div>
+                <div className="col-xs-8">
+                  <iframe id="pdf-preview" width="595" height="800" src=""></iframe>
+                </div>
+              </div>
             </div>
           </div>
-        </MuiThemeProvider>
     );
   }
 }

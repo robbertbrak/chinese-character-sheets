@@ -7,7 +7,7 @@ var TransferWebpackPlugin = require('transfer-webpack-plugin');
 var config = {
   entry: {
     app: [path.join(__dirname, '/src/app/app.jsx')],
-    vendor: ['react', 'material-ui', 'fzcs-pdfkit-fontkit']
+    vendor: ['react', 'fzcs-pdfkit-fontkit']
   },
   resolve: { extensions: ['', '.js', '.jsx']},
   output: { path: buildPath, filename: 'app.js'},
@@ -29,7 +29,7 @@ var config = {
 
     loaders: [
       { test: /\.(jsx)$/, loaders: ['babel'], exclude: [nodeModulesPath]},
-      { test: /\.scss$/, loaders: ['style', 'css', 'sass']},
+      { test: /\.less$/, loader: 'style!css!less' },
       { test: /\.json$/, loaders: ['json']},
       { test: /fzcs-pdfkit-fontkit|pdfkit|fontkit|unicode-trie|unicode-properties|png-js/, loader: 'transform?brfs' },
       { test: /\.(png|woff|woff2|eot|ttf|svg)$/, loader: 'url-loader?limit=100000' }
