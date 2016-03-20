@@ -19,7 +19,8 @@ class Main extends React.Component {
       squaresPerLine: 9,
       numGray: 3,
       loading: false,
-      percentComplete: 0
+      percentComplete: 0,
+      generated: false
     }
   }
 
@@ -58,6 +59,7 @@ class Main extends React.Component {
   }
 
   generatePdf(e) {
+    this.setState({loading: true});
     e.preventDefault();
     let size = Math.round(500 / this.state.squaresPerLine);
     if (size % 2 === 1) size += 1;
@@ -100,7 +102,10 @@ class Main extends React.Component {
     doc.end();
     stream.on('finish', () => {
       let url = stream.toBlobURL('application/pdf');
-      document.getElementById("pdf-preview").src = url;
+      this.setState({generated: true}, () => {
+        document.getElementById("pdf-preview").src = url;
+        this.setState({loading: false});
+      });
     });
   }
 
@@ -171,7 +176,9 @@ class Main extends React.Component {
                   </div>
                 </div>
                 <div className="col-sm-8">
-                  <iframe id="pdf-preview" width="595" height="800" src=""></iframe>
+                  {this.state.generated ?
+                      <iframe id="pdf-preview" width="595" height="810" src=""></iframe> : false
+                  }
                 </div>
               </div>
             </div>
