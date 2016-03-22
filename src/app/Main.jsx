@@ -4,6 +4,19 @@ import TextArea from 'react-textarea-autosize';
 let PDFDocument = require('fzcs-pdfkit-fontkit');
 let BlobStream = require('blob-stream');
 
+function debounce(func, wait) {
+  let timeout;
+  return function() {
+    let context = this, args = arguments;
+    let later = function() {
+      timeout = null;
+      func.apply(context, args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
+
 class Main extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -11,21 +24,19 @@ class Main extends React.Component {
     this.setSquaresPerLine = this.setSquaresPerLine.bind(this);
     this.setNumGray = this.setNumGray.bind(this);
     this.generatePdf = this.generatePdf.bind(this);
-    this.generatePage = this.generatePage.bind(this);
 
     this.state = {
       characters: '怎麼樣',
-      charactersOnCurrentPage: '',
       squaresPerLine: 9,
       numGray: 3,
-      loading: false,
+      loadingFont: false,
       percentComplete: 0,
-      generated: false
+      generating: false
     }
   }
 
   componentDidMount() {
-    this.setState({loading: true});
+    this.setState({loadingFont: true});
     let request = new XMLHttpRequest();
     request.open("GET", "fonts/UKaiCN.ttf", true);
     request.responseType = "arraybuffer";
@@ -37,7 +48,15 @@ class Main extends React.Component {
     }, false);
     request.send(null);
     request.onload = () => {
-      this.setState({fontBuffer: request.response, loading: false});
+      this.setState({fontBuffer: request.response, loadingFont: false});
+      this.generatePdf()
+    }
+  }
+
+  componentWillUpdate(_, nextState) {
+    if (nextState.squaresPerLine !== this.state.squaresPerLine
+        || nextState.numGray !== this.state.numGray) {
+      debounce(this.generatePdf, 500)();
     }
   }
 
@@ -58,10 +77,9 @@ class Main extends React.Component {
     })
   }
 
-  generatePdf(e) {
-    this.setState({loading: true});
-    e.preventDefault();
-    let size = Math.round(500 / this.state.squaresPerLine);
+  generatePdf() {
+    this.setState({generating: true});
+    let size = Math.round(510 / this.state.squaresPerLine);
     if (size % 2 === 1) size += 1;
     let h = size / 2;
 
@@ -73,12 +91,12 @@ class Main extends React.Component {
       chars = chars.substr(charsPerPage);
     }
 
-    let doc = new PDFDocument({margin: 1});
+    let doc = new PDFDocument({margin: 1, size: 'a4'});
     doc.registerFont('UKaiCN', this.state.fontBuffer);
 
     for (let p = 0; p < pages.length; p++) {
       if (p > 0) doc.addPage();
-      doc.font('Helvetica').fontSize(8).text('(c) Robbert Brak, robbertbrak.com', 440, 760);
+      doc.font('Helvetica').fontSize(8).text('(c) Robbert Brak, robbertbrak.com', 440, 810);
       doc.font('UKaiCN').fontSize(size - Math.round(size / 8));
       for (let i = 0; i < this.state.squaresPerLine; i++) {
         for (let j = 0; j < pages[p].length; j++) {
@@ -102,31 +120,9 @@ class Main extends React.Component {
     doc.end();
     stream.on('finish', () => {
       let url = stream.toBlobURL('application/pdf');
-      this.setState({generated: true}, () => {
-        document.getElementById("pdf-preview").src = url;
-        this.setState({loading: false});
-      });
+      document.getElementById("pdf-preview").src = url;
+      this.setState({generating: false});
     });
-  }
-
-  generatePage(pdf, pages) {
-    let grid = document.getElementById('print-grid');
-    this.setState({charactersOnCurrentPage: pages[0]},
-        () => {
-          grid.style.display = 'block';
-          pdf.setFontSize(12);
-          pdf.text(400, 830, '(c) Robbert Brak, robbertbrak.com');
-          pdf.addHTML(grid, 0, 40, () => {
-            if (pages.length > 1) {
-              pdf.addPage();
-              this.generatePage(pdf, pages.slice(1))
-            } else {
-              pdf.output('save', 'grid.pdf');
-              this.setState({generating: false});
-            }
-          })
-          grid.style.display = 'none';
-        });
   }
 
   render() {
@@ -139,7 +135,7 @@ class Main extends React.Component {
                 </div>
               </div>
             </nav>
-            <div className="container-fluid">
+            <div className="container">
               <div className="row">
                 <div className="col-sm-4">
                   <form>
@@ -164,21 +160,21 @@ class Main extends React.Component {
                   <div className="row higher">
                     <div className="col-md-12">
                       <button className="btn btn-primary btn-lg pull-right"
-                              disabled={this.state.loading} onClick={this.generatePdf}>
+                              disabled={this.state.loadingFont || this.state.generating} onClick={this.generatePdf}>
                         Generate PDF
                       </button>
-                      {this.state.loading ?
-                          (<div className="col-md-12">
+                      {this.state.loadingFont
+                          ? (<div className="col-md-12">
                             <span className="pull-right">
-                            {'Please wait while font is loading... ' + this.state.percentComplete + '%'}</span>
-                          </div>) : false}
+                              {'Please wait while font is loading... ' + this.state.percentComplete + '%'}
+                            </span>
+                          </div>)
+                          : false}
                     </div>
                   </div>
                 </div>
                 <div className="col-sm-8">
-                  {this.state.generated ?
-                      <iframe id="pdf-preview" width="595" height="810" src=""></iframe> : false
-                  }
+                  <iframe id="pdf-preview" width="500" height="800" frameBorder="no" src=""></iframe>
                 </div>
               </div>
             </div>
