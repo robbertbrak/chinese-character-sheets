@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import TextArea from 'react-textarea-autosize';
+import readQueryString from './querystring'
 
 let PDFDocument = require('fzcs-pdfkit-fontkit');
 let BlobStream = require('blob-stream');
@@ -26,7 +27,7 @@ class Main extends React.Component {
     this.generatePdf = this.generatePdf.bind(this);
 
     this.state = {
-      characters: '怎麼樣',
+      characters: readQueryString().characters || '怎麼樣',
       squaresPerLine: 9,
       numGray: 3,
       loadingFont: false,
@@ -35,12 +36,13 @@ class Main extends React.Component {
     }
   }
 
+
   componentDidMount() {
     this.setState({loadingFont: true});
     let request = new XMLHttpRequest();
-    request.open("GET", "fonts/UKaiCN.ttf", true);
-    request.responseType = "arraybuffer";
-    request.addEventListener("progress", (evt) => {
+    request.open('GET', 'fonts/UKaiCN.ttf', true);
+    request.responseType = 'arraybuffer';
+    request.addEventListener('progress', (evt) => {
       if (evt.lengthComputable) {
         let percentComplete = Math.round(100 * evt.loaded / evt.total);
         this.setState({percentComplete: percentComplete});
@@ -120,7 +122,7 @@ class Main extends React.Component {
     doc.end();
     stream.on('finish', () => {
       let url = stream.toBlobURL('application/pdf');
-      document.getElementById("pdf-preview").src = url;
+      document.getElementById('pdf-preview').src = url;
       this.setState({generating: false});
     });
   }
@@ -128,44 +130,44 @@ class Main extends React.Component {
   render() {
     return (
           <div>
-            <nav className="navbar navbar-default">
-              <div className="container">
-                <div className="navbar-header">
-                  <div className="navbar-brand">Chinese Character Practice Sheets</div>
+            <nav className='navbar navbar-default'>
+              <div className='container'>
+                <div className='navbar-header'>
+                  <div className='navbar-brand'>Chinese Character Practice Sheets</div>
                 </div>
               </div>
             </nav>
-            <div className="container">
-              <div className="row">
-                <div className="col-sm-4">
+            <div className='container'>
+              <div className='row'>
+                <div className='col-sm-4'>
                   <form>
-                    <div className="form-group">
-                      <label htmlFor="input-characters">Type characters here</label>
-                      <TextArea className="form-control" id="input-characters" type="text" minRows={2}
+                    <div className='form-group'>
+                      <label htmlFor='input-characters'>Type characters here</label>
+                      <TextArea className='form-control' id='input-characters' type='text' minRows={2}
                              value={this.state.characters} onChange={this.setCharacters} />
                     </div>
-                    <div className="form-group">
-                      <label htmlFor="input-squaresperline">{'Number of squares per line: ' + this.state.squaresPerLine}</label>
-                      <input type="range" min={4} max={10} step={1}
+                    <div className='form-group'>
+                      <label htmlFor='input-squaresperline'>{'Number of squares per line: ' + this.state.squaresPerLine}</label>
+                      <input type='range' min={4} max={10} step={1}
                              value={this.state.squaresPerLine} onChange={this.setSquaresPerLine}>
                       </input>
                     </div>
-                    <div className="form-group">
-                      <label htmlFor="input-numgray">{'Number of gray characters: ' + this.state.numGray}</label>
-                      <input type="range" min={0} max={this.state.squaresPerLine - 1} step={1}
+                    <div className='form-group'>
+                      <label htmlFor='input-numgray'>{'Number of gray characters: ' + this.state.numGray}</label>
+                      <input type='range' min={0} max={this.state.squaresPerLine - 1} step={1}
                              value={this.state.numGray} onChange={this.setNumGray}>
                       </input>
                     </div>
                   </form>
-                  <div className="row higher">
-                    <div className="col-md-12">
-                      <button className="btn btn-primary btn-lg pull-right"
+                  <div className='row higher'>
+                    <div className='col-md-12'>
+                      <button className='btn btn-primary btn-lg pull-right'
                               disabled={this.state.loadingFont || this.state.generating} onClick={this.generatePdf}>
                         Generate PDF
                       </button>
                       {this.state.loadingFont
-                          ? (<div className="col-md-12">
-                            <span className="pull-right">
+                          ? (<div className='col-md-12'>
+                            <span className='pull-right'>
                               {'Please wait while font is loading... ' + this.state.percentComplete + '%'}
                             </span>
                           </div>)
@@ -173,8 +175,8 @@ class Main extends React.Component {
                     </div>
                   </div>
                 </div>
-                <div className="col-sm-8">
-                  <iframe id="pdf-preview" width="500" height="800" frameBorder="no" src=""></iframe>
+                <div className='col-sm-8'>
+                  <iframe id='pdf-preview' width='500' height='800' frameBorder='no' src=''></iframe>
                 </div>
               </div>
             </div>
