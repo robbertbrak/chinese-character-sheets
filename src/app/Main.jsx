@@ -26,10 +26,14 @@ class Main extends React.Component {
     this.setNumGray = this.setNumGray.bind(this);
     this.generatePdf = this.generatePdf.bind(this);
 
+    let queryString = readQueryString();
+    let squares = Math.min(queryString.squares || 9, 10);
+    let numGray = Math.min(queryString.gray || 3, squares - 1);
+
     this.state = {
-      characters: readQueryString().characters || '怎麼樣',
-      squaresPerLine: 9,
-      numGray: 3,
+      characters: queryString.characters || '怎麼樣',
+      squaresPerLine: squares,
+      numGray: numGray,
       loadingFont: false,
       percentComplete: 0,
       generating: false
