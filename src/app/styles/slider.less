@@ -5,8 +5,8 @@
 @thumb-height: 20px;
 @thumb-width: 20px;
 @thumb-shadow-size: 0px;
-@thumb-shadow-blur: 0px;
-@thumb-shadow-color: #111;
+@thumb-shadow-blur: 5px;
+@thumb-shadow-color: @primary-color;
 @thumb-border-width: 0px;
 @thumb-border-color: white;
 
@@ -33,7 +33,6 @@
 }
 
 .thumb() {
-  .shadow(@thumb-shadow-size,@thumb-shadow-blur,@thumb-shadow-color);
   border: @thumb-border-width solid @thumb-border-color;
   height: @thumb-height;
   width: @thumb-width;
@@ -65,6 +64,10 @@ input[type=range] {
     margin-top: ((-@track-border-width * 2 + @track-height) / 2) - (@thumb-height / 2);
   }
 
+  &:active::-webkit-slider-thumb {
+    .shadow(@thumb-shadow-size, @thumb-shadow-blur, @thumb-shadow-color);
+  }
+
   &:focus::-webkit-slider-runnable-track {
     background: lighten(@track-color, @contrast);
   }
@@ -78,6 +81,10 @@ input[type=range] {
   }
   &::-moz-range-thumb {
     .thumb();
+  }
+
+  &:active::-moz-range-thumb {
+    .shadow(@thumb-shadow-size, @thumb-shadow-blur, @thumb-shadow-color);
   }
 
   &::-ms-track {
@@ -103,6 +110,11 @@ input[type=range] {
   &::-ms-thumb {
     .thumb();
   }
+
+  &:active::-ms-thumb {
+    .shadow(@thumb-shadow-size, @thumb-shadow-blur, @thumb-shadow-color);
+  }
+
   &:focus::-ms-fill-lower {
     background: @track-color;
   }

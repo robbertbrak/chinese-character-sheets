@@ -40,3 +40,10 @@
 #pdf-preview {
   border: 0;
 }
+
+.form-control {
+  &:focus {
+    border-color: @primary-color;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px fade(color(@primary-color), 60%)
+  }
+}

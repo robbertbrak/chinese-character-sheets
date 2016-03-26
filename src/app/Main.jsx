@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import TextArea from 'react-textarea-autosize';
 import readQueryString from './querystring'
+import predefinedLists from './predefined_lists'
+import LoadingIndicator from './LoadingIndicator'
 
 let PDFDocument = require('fzcs-pdfkit-fontkit');
 let BlobStream = require('blob-stream');
@@ -16,12 +18,13 @@ function debounce(func, wait) {
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
   };
-};
+}
 
 class Main extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.setCharacters = this.setCharacters.bind(this);
+    this.selectPredefinedList = this.selectPredefinedList.bind(this);
     this.setSquaresPerLine = this.setSquaresPerLine.bind(this);
     this.setNumGray = this.setNumGray.bind(this);
     this.generatePdf = this.generatePdf.bind(this);
@@ -59,15 +62,18 @@ class Main extends React.Component {
     }
   }
 
-  componentWillUpdate(_, nextState) {
-    if (nextState.squaresPerLine !== this.state.squaresPerLine
-        || nextState.numGray !== this.state.numGray) {
-      debounce(this.generatePdf, 500)();
-    }
-  }
-
   setCharacters(e) {
     this.setState({characters: e.target.value});
+  }
+
+  selectPredefinedList(e) {
+    let indices = e.target.value.split(',');
+    if (indices.length === 2) {
+      this.setState({
+        characters: predefinedLists[indices[0]]['lists'][indices[1]]['value'],
+        generating: true
+      }, () => setTimeout(this.generatePdf, 0));
+    }
   }
 
   setSquaresPerLine(e) {
@@ -84,50 +90,51 @@ class Main extends React.Component {
   }
 
   generatePdf() {
-    this.setState({generating: true});
-    let size = Math.round(510 / this.state.squaresPerLine);
-    if (size % 2 === 1) size += 1;
-    let h = size / 2;
+    this.setState({generating: true}, () => {
+      let size = Math.round(510 / this.state.squaresPerLine);
+      if (size % 2 === 1) size += 1;
+      let h = size / 2;
 
-    let charsPerPage = Math.floor(297 * this.state.squaresPerLine / 210);
-    let pages = [];
-    let chars = this.state.characters;
-    while (chars.length > 0) {
-      pages.push(chars.substr(0, charsPerPage));
-      chars = chars.substr(charsPerPage);
-    }
+      let charsPerPage = Math.floor(297 * this.state.squaresPerLine / 210);
+      let pages = [];
+      let chars = this.state.characters;
+      while (chars.length > 0) {
+        pages.push(chars.substr(0, charsPerPage));
+        chars = chars.substr(charsPerPage);
+      }
 
-    let doc = new PDFDocument({margin: 1, size: 'a4'});
-    doc.registerFont('UKaiCN', this.state.fontBuffer);
+      let doc = new PDFDocument({margin: 1, size: 'a4'});
+      doc.registerFont('UKaiCN', this.state.fontBuffer);
 
-    for (let p = 0; p < pages.length; p++) {
-      if (p > 0) doc.addPage();
-      doc.font('Helvetica').fontSize(8).text('(c) Robbert Brak, robbertbrak.com', 440, 810);
-      doc.font('UKaiCN').fontSize(size - Math.round(size / 8));
-      for (let i = 0; i < this.state.squaresPerLine; i++) {
-        for (let j = 0; j < pages[p].length; j++) {
-          let x = 40 + i * size;
-          let y = 40 + j * size;
-          doc.rect(x, y, size, size);
-          doc.lineWidth(1).undash().strokeColor('#000', '1').stroke();
-          doc.lineWidth(0.5).dash(3, 6).strokeColor('#000', '0.2')
-              .moveTo(x, y + h).lineTo(x + size, y + h)
-              .moveTo(x + h, y).lineTo(x + h, y + size)
-              .stroke();
+      for (let p = 0; p < pages.length; p++) {
+        if (p > 0) doc.addPage();
+        doc.font('Helvetica').fontSize(8).text('(c) Robbert Brak, robbertbrak.com', 440, 810);
+        doc.font('UKaiCN').fontSize(size - Math.round(size / 8));
+        for (let i = 0; i < this.state.squaresPerLine; i++) {
+          for (let j = 0; j < pages[p].length; j++) {
+            let x = 40 + i * size;
+            let y = 40 + j * size;
+            doc.rect(x, y, size, size);
+            doc.lineWidth(1).undash().strokeColor('#000', '1').stroke();
+            doc.lineWidth(0.5).dash(3, 6).strokeColor('#000', '0.2')
+                .moveTo(x, y + h).lineTo(x + size, y + h)
+                .moveTo(x + h, y).lineTo(x + h, y + size)
+                .stroke();
 
-          doc.fillColor('#000', '1');
-          if (i > 0 && i <= this.state.numGray) doc.opacity('0.3');
-          if (i <= this.state.numGray) doc.text(pages[p].charAt(j), x + Math.round(size / 20), y);
+            doc.fillColor('#000', '1');
+            if (i > 0 && i <= this.state.numGray) doc.opacity('0.3');
+            if (i <= this.state.numGray) doc.text(pages[p].charAt(j), x + Math.round(size / 20), y);
+          }
         }
       }
-    }
 
-    let stream = doc.pipe(BlobStream());
-    doc.end();
-    stream.on('finish', () => {
-      let url = stream.toBlobURL('application/pdf');
-      document.getElementById('pdf-preview').src = url;
-      this.setState({generating: false});
+      let stream = doc.pipe(BlobStream());
+      doc.end();
+      stream.on('finish', () => {
+        let url = stream.toBlobURL('application/pdf');
+        document.getElementById('pdf-preview').src = url;
+        this.setState({generating: false});
+      });
     });
   }
 
@@ -147,8 +154,19 @@ class Main extends React.Component {
                   <form>
                     <div className='form-group'>
                       <label htmlFor='input-characters'>Type characters here</label>
-                      <TextArea className='form-control' id='input-characters' type='text' minRows={2}
+                      <TextArea className='form-control' id='input-characters' type='text' minRows={2} maxRows={20}
                              value={this.state.characters} onChange={this.setCharacters} />
+                    </div>
+                    <div className='form-group'>
+                      <select className='form-control' id='predefined-lists' onChange={this.selectPredefinedList}>
+                        <option key={-1} value={-1}>- Select predefined list -</option>
+                        {predefinedLists.map((group, i) =>
+                            (<optgroup key={'og' + i} label={group.header}>
+                              {group.lists.map((list, index) =>
+                                  (<option key={i + ',' + index} value={i + ',' + index}>{list.name}</option>)
+                              )
+                              }</optgroup>))}
+                      </select>
                     </div>
                     <div className='form-group'>
                       <label htmlFor='input-squaresperline'>{'Number of squares per line: ' + this.state.squaresPerLine}</label>
@@ -170,12 +188,9 @@ class Main extends React.Component {
                         Generate PDF
                       </button>
                       {this.state.loadingFont
-                          ? (<div className='col-md-12'>
-                            <span className='pull-right'>
-                              {'Please wait while font is loading... ' + this.state.percentComplete + '%'}
-                            </span>
-                          </div>)
+                          ? (<LoadingIndicator text={'Please wait while font is loading... ' + this.state.percentComplete + '%'} />)
                           : false}
+                      {this.state.generating ? (<LoadingIndicator text={'Generating PDF... '} />) : false}
                     </div>
                   </div>
                 </div>
