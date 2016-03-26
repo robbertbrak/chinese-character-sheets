@@ -6,3 +6,4 @@ Note that I commented out most of the registered formats in fontkit/index.js to 
 
 The font is based on the freely available [AR PL UKai](http://packages.ubuntu.com/fonts-arphic-ukai) font collection, converted from TTC to TTF with [FontForge](https://fontforge.github.io/).
 
+The HSK word lists were adapted from [http://www.hskhsk.com/word-lists.html](http://www.hskhsk.com/word-lists.html). 
