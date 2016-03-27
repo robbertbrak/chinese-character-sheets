@@ -20,11 +20,17 @@ function debounce(func, wait) {
   };
 }
 
+const papersizes = {
+  'a4': [595, 842],
+  'letter': [612, 792]
+}
+
 class Main extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.setCharacters = this.setCharacters.bind(this);
     this.selectPredefinedList = this.selectPredefinedList.bind(this);
+    this.selectPapersize = this.selectPapersize.bind(this);
     this.setSquaresPerLine = this.setSquaresPerLine.bind(this);
     this.setNumGray = this.setNumGray.bind(this);
     this.generatePdf = this.generatePdf.bind(this);
@@ -39,7 +45,8 @@ class Main extends React.Component {
       numGray: numGray,
       loadingFont: false,
       percentComplete: 0,
-      generating: false
+      generating: false,
+      papersize: 'a4'
     }
   }
 
@@ -63,7 +70,7 @@ class Main extends React.Component {
   }
 
   setCharacters(e) {
-    this.setState({characters: e.target.value});
+    this.setState({ characters: e.target.value });
   }
 
   selectPredefinedList(e) {
@@ -74,6 +81,13 @@ class Main extends React.Component {
         generating: true
       }, () => setTimeout(this.generatePdf, 0));
     }
+  }
+
+  selectPapersize(e) {
+    this.setState({
+      papersize: e.target.value,
+      generating: true
+    }, () => setTimeout(this.generatePdf, 0));
   }
 
   setSquaresPerLine(e) {
@@ -95,7 +109,9 @@ class Main extends React.Component {
       if (size % 2 === 1) size += 1;
       let h = size / 2;
 
-      let charsPerPage = Math.floor(297 * this.state.squaresPerLine / 210);
+      let papersize = papersizes[this.state.papersize];
+
+      let charsPerPage = Math.floor(papersize[1] * this.state.squaresPerLine / papersize[0]);
       let pages = [];
       let chars = this.state.characters;
       while (chars.length > 0) {
@@ -103,12 +119,14 @@ class Main extends React.Component {
         chars = chars.substr(charsPerPage);
       }
 
-      let doc = new PDFDocument({margin: 1, size: 'a4'});
+      let doc = new PDFDocument({margin: 1, size: this.state.papersize});
       doc.registerFont('UKaiCN', this.state.fontBuffer);
 
       for (let p = 0; p < pages.length; p++) {
         if (p > 0) doc.addPage();
-        doc.font('Helvetica').fontSize(8).text('(c) Robbert Brak, robbertbrak.com', 440, 810);
+        doc.font('Helvetica').fontSize(8)
+            .text('(c) Robbert Brak, robbertbrak.com', papersize[0] - 160, papersize[1] - 32);
+
         doc.font('UKaiCN').fontSize(size - Math.round(size / 8));
         for (let i = 0; i < this.state.squaresPerLine; i++) {
           for (let j = 0; j < pages[p].length; j++) {
@@ -166,6 +184,14 @@ class Main extends React.Component {
                                   (<option key={i + ',' + index} value={i + ',' + index}>{list.name}</option>)
                               )
                               }</optgroup>))}
+                      </select>
+                    </div>
+                    <div className='form-group'>
+                      <label htmlFor='input-characters'>Paper size</label>
+                      <select className='form-control' id='papersize'
+                              value={this.state.papersize} onChange={this.selectPapersize}>
+                        <option value='a4'>A4</option>
+                        <option value='letter'>US Letter</option>
                       </select>
                     </div>
                     <div className='form-group'>
