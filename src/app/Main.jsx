@@ -113,7 +113,7 @@ class Main extends React.Component {
 
       let charsPerPage = Math.floor(papersize[1] * this.state.squaresPerLine / papersize[0]);
       let pages = [];
-      let chars = this.state.characters;
+      let chars = this.state.characters.replace(/\s/g,'');
       while (chars.length > 0) {
         pages.push(chars.substr(0, charsPerPage));
         chars = chars.substr(charsPerPage);
