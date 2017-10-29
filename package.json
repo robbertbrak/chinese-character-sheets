@@ -43,8 +43,9 @@
     "blob-stream": "^0.1.3",
     "bootstrap": "^3.3.6",
     "brfs": "^1.4.3",
+    "buffer": "^5.0.8",
     "fs": "0.0.2",
-    "fzcs-pdfkit-fontkit": "0.0.2",
+    "pdfkit": "0.8.3",
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
     "react-textarea-autosize": "^3.3.0"

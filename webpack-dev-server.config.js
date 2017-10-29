@@ -7,7 +7,7 @@ var TransferWebpackPlugin = require('transfer-webpack-plugin');
 var config = {
   entry: {
     app: ['webpack/hot/dev-server', 'webpack/hot/only-dev-server', path.join(__dirname, '/src/app/app.jsx')],
-    vendor: ['react', 'fzcs-pdfkit-fontkit']
+    vendor: ['react', 'pdfkit']
   },
   resolve: { extensions: ['', '.js', '.jsx']},
   devServer:{

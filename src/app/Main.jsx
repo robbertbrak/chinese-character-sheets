@@ -4,7 +4,7 @@ import readQueryString from './querystring'
 import predefinedLists from './predefined_lists'
 import LoadingIndicator from './LoadingIndicator'
 
-let PDFDocument = require('fzcs-pdfkit-fontkit');
+let PDFDocument = require('pdfkit');
 let BlobStream = require('blob-stream');
 
 function debounce(func, wait) {
